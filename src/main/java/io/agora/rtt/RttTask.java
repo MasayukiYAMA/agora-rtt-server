@@ -12,20 +12,22 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import io.github.cdimascio.dotenv.Dotenv;
+
 import java.util.Base64;
 
 public class RttTask {
 
     // Agora ID and security parameters
-    private static final String appId = System.getenv("APP_ID");
-    private static final String appCertificate = System.getenv("APP_CERTIFICATE");
-    private static final String customerId = System.getenv("CUSTOMER_ID");
-    private static final String customerSecret = System.getenv("CUSTOMER_SECRET");
+    private static final String appId = Dotenv.load().get("APP_ID");
+    private static final String appCertificate = Dotenv.load().get("APP_CERTIFICATE");
+    private static final String customerId = Dotenv.load().get("CUSTOMER_ID");
+    private static final String customerSecret = Dotenv.load().get("CUSTOMER_SECRET");
 
     // Cloud storage parameters
-    private String ossSecretKey = System.getenv("OSS_SECRET_KEY");
-    private String ossAccessKey = System.getenv("OSS_ACCESS_KEY");
-    private String ossBucketName = System.getenv("OSS_BUCKET_NAME");
+    private String ossSecretKey = Dotenv.load().get("OSS_SECRET_KEY");
+    private String ossAccessKey = Dotenv.load().get("OSS_ACCESS_KEY");
+    private String ossBucketName = Dotenv.load().get("OSS_BUCKET_NAME");
     private static final String baseUrl = "https://api.agora.io";
 
     // Authorization header for HTTP requests

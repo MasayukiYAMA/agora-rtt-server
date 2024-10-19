@@ -12,16 +12,9 @@ import com.sun.net.httpserver.HttpServer;
 import io.github.cdimascio.dotenv.Dotenv;
 
 public class Main {
-	public static int port = (System.getenv("PORT") != null) ? Integer.parseInt(System.getenv("PORT")) : 80;
+	public static int port = Integer.parseInt(Dotenv.load().get("PORT", "80"));
 
 	public static void main(String[] args) {
-		// Dotenvを使用して.envファイルを読み込む
-		Dotenv dotenv = Dotenv.load();
-
-		// .envファイルからPORTを取得（存在しない場合はデフォルトで80を使用）
-		String portStr = dotenv.get("PORT", "80");
-
-		System.out.println(portStr);
 		// Firebaseの初期化
 		try {
 			FileInputStream serviceAccount = new FileInputStream("/home/masaofyamad/spajam-service-accounts.json");
@@ -47,7 +40,6 @@ public class Main {
 		public void Start(int port) {
 			try {
 				server = HttpServer.create(new InetSocketAddress(port), 0);
-				System.out.println(System.getenv("PORT"));
 				System.out.println("RTT server started on port " + port);
 
 				server.createContext("/", new Handlers.RootHandler());
