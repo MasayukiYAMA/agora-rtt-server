@@ -17,40 +17,41 @@ import java.util.Base64;
 public class RttTask {
 
     // Agora ID and security parameters
-    private static final String appId = System.getenv("APP_ID"); 
-    private static final String appCertificate = System.getenv("APP_CERTIFICATE"); 
-    private static final String customerId = System.getenv("CUSTOMER_ID"); 
-    private static final String customerSecret = System.getenv("CUSTOMER_SECRET"); 
+    private static final String appId = System.getenv("APP_ID");
+    private static final String appCertificate = System.getenv("APP_CERTIFICATE");
+    private static final String customerId = System.getenv("CUSTOMER_ID");
+    private static final String customerSecret = System.getenv("CUSTOMER_SECRET");
 
     // Cloud storage parameters
-    private String ossSecretKey = System.getenv("OSS_SECRET_KEY"); 
+    private String ossSecretKey = System.getenv("OSS_SECRET_KEY");
     private String ossAccessKey = System.getenv("OSS_ACCESS_KEY");
-    private String ossBucketName = System.getenv("OSS_BUCKET_NAME"); 
+    private String ossBucketName = System.getenv("OSS_BUCKET_NAME");
     private static final String baseUrl = "https://api.agora.io";
-    
+
     // Authorization header for HTTP requests
     private static final String authorizationHeader = "Basic " + new String(Base64.getEncoder()
             .encode((customerId + ":" + customerSecret).getBytes()));;
-    
+
     public String channelName; // The channel for the RTT task
     public String status; // Holds the last status returned
-    public String language = "en-US"; // Max 2 simultaneous languages are supported, separated by a comma.
+    public String language = "ja-JP"; // Max 2 simultaneous languages are supported, separated by a comma.
     public String taskId = ""; // Holds the ID of the RTT task
     public int userId; // Identifies the user who sent the start request
     public int maxIdleTime = 120; // If there is no activity of this time, the task stops automatically.
 
     // Unique uids to access the audio in the channel, and send the text
-    private int uidAudio = 111, uidText = 222; 
+    private int uidAudio = 111, uidText = 222;
     private String tokenAudio, tokenText; // Tokens corresponding to the audio and text uids
 
     private String builderToken; // The builder token required to send start, query and stop requests
     private String instanceId; // A string that identifies the RTT task
-    
+
     public RttTask(int userId, String channelName) {
         this.userId = userId;
         this.channelName = channelName;
-        // InstanceId can be any unique string, best practice is to set it to the channel name.
-        instanceId = channelName; 
+        // InstanceId can be any unique string, best practice is to set it to the
+        // channel name.
+        instanceId = channelName;
     }
 
     private RttResult getBuilderToken() throws IOException {
@@ -101,19 +102,24 @@ public class RttTask {
         JSONObject startConfig = new JSONObject()
                 .put("audio", new JSONObject()
                         .put("subscribeSource", "AGORARTC") // Currently fixed
-                        .put("agoraRtcConfig", new JSONObject() 
-                                .put("channelName", channelName) // Name of the channel for RTT 
-                                .put("uid", String.valueOf(uidAudio)) // Uid used by the audio streaming bot. Must be an integer specified as a string. For example "111"
+                        .put("agoraRtcConfig", new JSONObject()
+                                .put("channelName", channelName) // Name of the channel for RTT
+                                .put("uid", String.valueOf(uidAudio)) // Uid used by the audio streaming bot. Must be an
+                                                                      // integer specified as a string. For example
+                                                                      // "111"
                                 .put("token", tokenAudio) // RTC token for the audio uid
                                 .put("channelType", "LIVE_TYPE") // Currently fixed
                                 .put("subscribeConfig", new JSONObject()
                                         .put("subscribeMode", "CHANNEL_MODE")) // Currently fixed
-                                .put("maxIdleTime", maxIdleTime))) // If there is no audio stream in the channel for more than this time, the RTT task stops automatically
+                                .put("maxIdleTime", maxIdleTime))) // If there is no audio stream in the channel for
+                                                                   // more than this time, the RTT task stops
+                                                                   // automatically
                 .put("config", new JSONObject()
                         .put("features", new JSONArray()
                                 .put("RECOGNIZE")) // Currently fixed
                         .put("recognizeConfig", new JSONObject()
-                                .put("language", language) // Supports at most two language codes separated by commas. For example, "en-US,ja-JP"
+                                .put("language", language) // Supports at most two language codes separated by commas.
+                                                           // For example, "en-US,ja-JP"
                                 .put("model", "Model") // Currently fixed
                                 .put("output", new JSONObject()
                                         .put("destinations", new JSONArray()
@@ -121,21 +127,29 @@ public class RttTask {
                                                 .put("Storage"))
                                         .put("agoraRTCDataStream",
                                                 new JSONObject()
-                                                        .put("channelName", channelName) // Name of the channel for RTT 
-                                                        .put("uid", String.valueOf(uidText)) // Uid used for text streaming. Must be a unique integer specified as a string. For example "222"
+                                                        .put("channelName", channelName) // Name of the channel for RTT
+                                                        .put("uid", String.valueOf(uidText)) // Uid used for text
+                                                                                             // streaming. Must be a
+                                                                                             // unique integer specified
+                                                                                             // as a string. For example
+                                                                                             // "222"
                                                         .put("token", tokenText)) // RTC token for the text uid
                                         .put("cloudStorage", new JSONArray()
                                                 .put(new JSONObject()
                                                         .put("format", "HLS") // Currently fixed
                                                         .put("storageConfig",
                                                                 new JSONObject()
-                                                                        .put("accessKey", ossAccessKey) // Access key of oss
-                                                                        .put("secretKey", ossSecretKey) // Secret key of oss
+                                                                        .put("accessKey", ossAccessKey) // Access key of
+                                                                                                        // oss
+                                                                        .put("secretKey", ossSecretKey) // Secret key of
+                                                                                                        // oss
                                                                         .put("bucket", ossBucketName) // Oss bucket name
                                                                         .put("vendor", 1) // Your Oss Vendor ID
                                                                         .put("region", 1) // Your Oss Region ID
                                                                         .put("fileNamePrefix",
-                                                                                new JSONArray() // An array of directory strings to append to storage files
+                                                                                new JSONArray() // An array of directory
+                                                                                                // strings to append to
+                                                                                                // storage files
                                                                                         .put("folder")
                                                                                         .put("subFolder"))))))));
 
@@ -153,7 +167,7 @@ public class RttTask {
             String result = response.body().string();
             if (response.isSuccessful()) {
                 try {
-                    // Read the status and task ID from the response 
+                    // Read the status and task ID from the response
                     JSONObject jsonObject = new JSONObject(result);
                     status = jsonObject.getString("status");
                     taskId = jsonObject.getString("taskId");
